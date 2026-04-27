@@ -1,65 +1,82 @@
 // ================================================
 // PIXEL DASHBOARD — Google Apps Script Backend
+// รองรับ JSONP (callback parameter)
 // ================================================
 
 const SHEET_NAME = "tasks";
 
 function doGet(e) {
-  try {
-    const action = e.parameter.action;
+  const callback = e.parameter.callback; // JSONP callback name
+  let result;
 
-    // GET tasks
-    if (!action || action === 'get') {
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-      const data  = sheet.getDataRange().getValues();
+  try {
+    const action = e.parameter.action || 'get';
+
+    if (action === 'get') {
+      const sheet   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+      const data    = sheet.getDataRange().getValues();
       const headers = data[0];
-      const rows    = data.slice(1);
-      const tasks = rows
+      const tasks   = data.slice(1)
         .filter(r => r[0] !== '')
         .map(r => {
           const obj = {};
           headers.forEach((h, i) => {
             if (h === 'done') obj[h] = r[i] === true || r[i] === 'TRUE';
             else if (h === 'id') obj[h] = Number(r[i]);
-            else obj[h] = r[i];
+            else obj[h] = String(r[i]);
           });
           return obj;
         });
-      return jsonResponse({ status: 'ok', tasks });
+      result = { status: 'ok', tasks };
     }
 
-    // ADD
-    if (action === 'add') {
+    else if (action === 'add') {
+      const t     = JSON.parse(e.parameter.task);
       const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-      const t = JSON.parse(e.parameter.task);
       sheet.appendRow([t.id, t.name, t.dueDate, t.priority, t.color, t.done]);
-      return jsonResponse({ status: 'ok', message: 'added' });
+      result = { status: 'ok', message: 'added' };
     }
 
-    // UPDATE
-    if (action === 'update') {
+    else if (action === 'update') {
+      const t     = JSON.parse(e.parameter.task);
       const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-      const t   = JSON.parse(e.parameter.task);
-      const row = findRow(sheet, t.id);
-      if (!row) return jsonResponse({ status: 'error', message: 'not found' });
-      sheet.getRange(row, 1, 1, 6).setValues([[t.id, t.name, t.dueDate, t.priority, t.color, t.done]]);
-      return jsonResponse({ status: 'ok', message: 'updated' });
+      const row   = findRow(sheet, t.id);
+      if (!row) { result = { status: 'error', message: 'not found' }; }
+      else {
+        sheet.getRange(row, 1, 1, 6).setValues([[t.id, t.name, t.dueDate, t.priority, t.color, t.done]]);
+        result = { status: 'ok', message: 'updated' };
+      }
     }
 
-    // DELETE
-    if (action === 'delete') {
+    else if (action === 'delete') {
       const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-      const row = findRow(sheet, Number(e.parameter.id));
-      if (!row) return jsonResponse({ status: 'error', message: 'not found' });
-      sheet.deleteRow(row);
-      return jsonResponse({ status: 'ok', message: 'deleted' });
+      const row   = findRow(sheet, Number(e.parameter.id));
+      if (!row) { result = { status: 'error', message: 'not found' }; }
+      else {
+        sheet.deleteRow(row);
+        result = { status: 'ok', message: 'deleted' };
+      }
     }
 
-    return jsonResponse({ status: 'error', message: 'unknown action' });
+    else {
+      result = { status: 'error', message: 'unknown action' };
+    }
 
   } catch(err) {
-    return jsonResponse({ status: 'error', message: err.toString() });
+    result = { status: 'error', message: err.toString() };
   }
+
+  const json = JSON.stringify(result);
+
+  // ถ้ามี callback = JSONP, ถ้าไม่มี = JSON ปกติ
+  if (callback) {
+    return ContentService
+      .createTextOutput(`${callback}(${json})`)
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService
+    .createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function findRow(sheet, id) {
@@ -68,10 +85,4 @@ function findRow(sheet, id) {
     if (Number(data[i][0]) === Number(id)) return i + 1;
   }
   return null;
-}
-
-function jsonResponse(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
 }
