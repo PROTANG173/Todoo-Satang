@@ -6,7 +6,7 @@
 // ══════════════════════════════════════════════
 //  ⚠️  วาง URL ของ Apps Script ที่ Deploy แล้วตรงนี้
 // ══════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbypiFHKCZGJEgH8-TneXEjOMKt4DoxGU8ilJtv_FX86v7RSQyZLyjcZxYeeQ2BXC0wJ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzgxxfQhBVF-kbaHnOQSxSp6QIlF4SrdUk0ifYN0YrDKz21QKx2CMmhA-olRM9tSgAL/exec';
 // ตัวอย่าง: 'https://script.google.com/macros/s/AKfycb.../exec'
 // ══════════════════════════════════════════════
 
