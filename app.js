@@ -45,13 +45,17 @@ function startClock() {
 }
 
 /* ════ API HELPERS ════ */
+// ใช้ GET ทั้งหมด เพื่อหลีกเลี่ยง CORS preflight
 async function apiFetch(params) {
-  const url = API_URL + '?t=' + Date.now();
-  const res = await fetch(url, { method: 'POST', body: JSON.stringify(params) });
+  const qs  = Object.entries(params)
+    .map(([k, v]) => `${k}=${encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v)}`)
+    .join('&');
+  const url = API_URL + '?t=' + Date.now() + '&' + qs;
+  const res = await fetch(url);
   return res.json();
 }
 async function apiGet() {
-  const url = API_URL + '?t=' + Date.now();
+  const url = API_URL + '?action=get&t=' + Date.now();
   const res = await fetch(url);
   return res.json();
 }
