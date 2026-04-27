@@ -1,14 +1,9 @@
 /* ===========================
    PIXEL DASHBOARD — app.js
-   (Google Sheets Backend)
+   (Google Sheets via JSONP)
    =========================== */
 
-// ══════════════════════════════════════════════
-//  ⚠️  วาง URL ของ Apps Script ที่ Deploy แล้วตรงนี้
-// ══════════════════════════════════════════════
 const API_URL = 'https://script.google.com/macros/s/AKfycbzgxxfQhBVF-kbaHnOQSxSp6QIlF4SrdUk0ifYN0YrDKz21QKx2CMmhA-olRM9tSgAL/exec';
-// ตัวอย่าง: 'https://script.google.com/macros/s/AKfycb.../exec'
-// ══════════════════════════════════════════════
 
 /* ════ STATE ════ */
 let tasks    = [];
@@ -44,27 +39,38 @@ function startClock() {
   setInterval(tick, 1000);
 }
 
-/* ════ API HELPERS ════ */
-// ใช้ GET ทั้งหมด เพื่อหลีกเลี่ยง CORS preflight
-async function apiFetch(params) {
-  const qs  = Object.entries(params)
-    .map(([k, v]) => `${k}=${encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v)}`)
-    .join('&');
-  const url = API_URL + '?t=' + Date.now() + '&' + qs;
-  const res = await fetch(url);
-  return res.json();
-}
-async function apiGet() {
-  const url = API_URL + '?action=get&t=' + Date.now();
-  const res = await fetch(url);
-  return res.json();
+/* ════ JSONP HELPER ════ */
+// ใช้ JSONP แทน fetch เพื่อหลีกเลี่ยง CORS ทั้งหมด
+function jsonp(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_cb_' + Date.now();
+    const qs = Object.entries(params)
+      .map(([k,v]) => `${k}=${encodeURIComponent(typeof v==='object'?JSON.stringify(v):v)}`)
+      .join('&');
+    const url = `${API_URL}?callback=${cbName}&${qs}`;
+
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.head.removeChild(script);
+      resolve(data);
+    };
+
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = () => {
+      delete window[cbName];
+      document.head.removeChild(script);
+      reject(new Error('JSONP failed'));
+    };
+    document.head.appendChild(script);
+  });
 }
 
 /* ════ LOAD TASKS ════ */
 async function loadTasks() {
   setLoading(true);
   try {
-    const data = await apiGet();
+    const data = await jsonp({ action: 'get' });
     if (data.status === 'ok') {
       tasks = data.tasks;
       render();
@@ -72,7 +78,8 @@ async function loadTasks() {
       showToast('ERROR: ' + data.message, 'error');
     }
   } catch (e) {
-    showToast('ERROR: ตรวจสอบ API_URL ใน app.js', 'error');
+    showToast('ERROR: เชื่อมต่อ API ไม่ได้', 'error');
+    console.error(e);
   }
   setLoading(false);
 }
@@ -242,7 +249,7 @@ async function toggleDone(id) {
   tasks = tasks.map(x => x.id === id ? updated : x);
   render();
   try {
-    await apiFetch({ action: 'update', task: updated });
+    await jsonp({ action: 'update', task: updated });
   } catch (e) {
     showToast('ERROR: บันทึกไม่สำเร็จ', 'error');
     await loadTasks();
@@ -325,13 +332,13 @@ async function saveTask() {
       const updated = { ...tasks.find(t => t.id === editId), name, dueDate, priority: selPrio, color: selColor };
       tasks = tasks.map(t => t.id === editId ? updated : t);
       render();
-      await apiFetch({ action: 'update', task: updated });
+      await jsonp({ action: 'update', task: updated });
       showToast('✓ UPDATED');
     } else {
       const newTask = { id: Date.now(), name, dueDate, priority: selPrio, color: selColor, done: false };
       tasks.push(newTask);
       render();
-      await apiFetch({ action: 'add', task: newTask });
+      await jsonp({ action: 'add', task: newTask });
       showToast('✓ TASK ADDED');
     }
   } catch (e) {
@@ -351,7 +358,7 @@ async function deleteTask() {
   document.getElementById('modal-overlay').classList.remove('open');
   editId = null;
   try {
-    await apiFetch({ action: 'delete', id });
+    await jsonp({ action: 'delete', id });
     showToast('✓ DELETED');
   } catch (e) {
     showToast('ERROR: ลบไม่สำเร็จ', 'error');
