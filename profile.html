@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SATANG.DEV</title>
+  <link rel="stylesheet" href="profile.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<div class="crt-vignette"></div>
+
+<!-- ═══ TOP BAR ═══ -->
+<header class="topbar">
+  <div class="tb-left">
+    <span class="tb-logo">▣ SATANG.DEV</span>
+    <span class="tb-ver">v1.0</span>
+  </div>
+  <div class="tb-right">
+    <div id="login-area">
+      <button class="btn-login" onclick="openLogin()">[ LOG IN ]</button>
+    </div>
+    <div id="user-area" style="display:none">
+      <span class="logged-as">▶ ADMIN</span>
+      <button class="btn-logout" onclick="doLogout()">[ LOG OUT ]</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN GRID ═══ -->
+<main class="grid">
+
+  <!-- ── BOX 1 : SCHEDULE (LEFT) ── -->
+  <section class="panel box1" id="box1">
+    <div class="panel-header">
+      <span class="ph-icon">▤</span>
+      <span class="ph-title">SCHEDULE</span>
+      <span class="ph-sub">// TASK BOARD</span>
+    </div>
+    <div class="schedule-body">
+      <div class="schedule-preview">
+        <div class="sp-label">CURRENT QUESTS</div>
+        <div class="sp-items" id="sp-items">
+          <div class="sp-item sp-loading">
+            <span class="blink">█</span> LOADING...
+          </div>
+        </div>
+        <a class="btn-goto" href="index.html" target="_blank">
+          [ OPEN FULL DASHBOARD → ]
+        </a>
+      </div>
+      <!-- EDIT MODE -->
+      <div class="edit-schedule" id="edit-schedule" style="display:none">
+        <label>DASHBOARD URL</label>
+        <input type="text" id="dash-url" placeholder="https://..."/>
+        <button class="btn-save-field" onclick="saveField('dashUrl')">[ SAVE ]</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RIGHT COLUMN ── -->
+  <div class="right-col">
+
+    <!-- ── BOX 2 : PROFILE PHOTO ── -->
+    <section class="panel box2" id="box2">
+      <div class="panel-header">
+        <span class="ph-icon">▣</span>
+        <span class="ph-title">PLAYER</span>
+        <button class="btn-edit-panel" id="btn-edit-photo" onclick="toggleEditPhoto()" style="display:none">[ EDIT ]</button>
+      </div>
+      <div class="photo-body">
+        <div class="photo-frame">
+          <img id="profile-img" src="https://i.postimg.cc/VkM56kQr/unnamed-(1).jpg" alt="Satang"/>
+          <div class="photo-corner tl"></div>
+          <div class="photo-corner tr"></div>
+          <div class="photo-corner bl"></div>
+          <div class="photo-corner br"></div>
+        </div>
+        <!-- edit mode -->
+        <div class="edit-photo" id="edit-photo" style="display:none">
+          <label>IMAGE URL</label>
+          <input type="text" id="photo-url-input" placeholder="https://..."/>
+          <button class="btn-save-field" onclick="saveField('photoUrl')">[ APPLY ]</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BOX 3 : BIO + COUNTDOWN ── -->
+    <section class="panel box3" id="box3">
+      <div class="panel-header">
+        <span class="ph-icon">◈</span>
+        <span class="ph-title">PROFILE</span>
+        <button class="btn-edit-panel" id="btn-edit-bio" onclick="toggleEditBio()" style="display:none">[ EDIT ]</button>
+      </div>
+      <div class="bio-body">
+
+        <div class="bio-grid" id="bio-display">
+          <div class="bio-row">
+            <span class="bio-key">NAME</span>
+            <span class="bio-val" id="d-name">Thanawit Kongnin</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">NICKNAME</span>
+            <span class="bio-val" id="d-nick">Satang</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">AGE</span>
+            <span class="bio-val" id="d-age">17</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">BORN</span>
+            <span class="bio-val" id="d-born">17 / 02 / 2009</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">SCHOOL</span>
+            <span class="bio-val" id="d-school">NongphaiSchool</span>
+          </div>
+        </div>
+
+        <!-- EDIT FIELDS -->
+        <div class="bio-edit" id="bio-edit" style="display:none">
+          <label>FULL NAME</label>
+          <input type="text" id="e-name" value="Thanawit Kongnin"/>
+          <label>NICKNAME</label>
+          <input type="text" id="e-nick" value="Satang"/>
+          <label>AGE</label>
+          <input type="text" id="e-age" value="17"/>
+          <label>BORN (DD/MM/YYYY)</label>
+          <input type="text" id="e-born" value="17/02/2009"/>
+          <label>SCHOOL</label>
+          <input type="text" id="e-school" value="NongphaiSchool"/>
+          <button class="btn-save-field" onclick="saveBio()">[ SAVE ALL ]</button>
+        </div>
+
+        <!-- BIRTHDAY COUNTDOWN -->
+        <div class="countdown-box">
+          <div class="cd-label">🎂 NEXT BIRTHDAY IN</div>
+          <div class="cd-timer" id="cd-timer">
+            <span class="cd-unit"><b id="cd-days">--</b><small>DAYS</small></span>
+            <span class="cd-sep">:</span>
+            <span class="cd-unit"><b id="cd-hrs">--</b><small>HRS</small></span>
+            <span class="cd-sep">:</span>
+            <span class="cd-unit"><b id="cd-min">--</b><small>MIN</small></span>
+            <span class="cd-sep">:</span>
+            <span class="cd-unit"><b id="cd-sec">--</b><small>SEC</small></span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /right-col -->
+</main>
+
+<!-- ═══ LOGIN MODAL ═══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeLoginOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span>[ ADMIN LOGIN ]</span>
+      <button onclick="closeLogin()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>ADMIN NAME</label>
+      <input type="text" id="un-input" placeholder="ENTER USERNAME..." autocomplete="off"/>
+      <label>PASSWORD</label>
+      <input type="password" id="pw-input" placeholder="ENTER PASSWORD..." onkeydown="if(event.key==='Enter')doLogin()"/>
+      <div class="login-error" id="login-error">❌ INVALID CREDENTIALS</div>
+      <div class="login-hint" id="login-hint"></div>
+      <button class="btn-login-go" id="btn-login-go" onclick="doLogin()">[ LOGIN ]</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN SECTION (hidden until login) ═══ -->
+<section class="admin-section" id="admin-section" style="display:none">
+  <div class="as-header">
+    <span class="as-title">▣ ADMIN PANEL</span>
+    <span class="as-sub">// SELECT MODULE</span>
+  </div>
+  <div class="as-buttons">
+    <button class="as-btn" onclick="void(0)">
+      <span class="as-btn-icon">▤</span>
+      <span class="as-btn-label">TASK BOARD</span>
+      <span class="as-btn-sub">ตารางงาน</span>
+    </button>
+    <button class="as-btn" onclick="void(0)">
+      <span class="as-btn-icon">♠</span>
+      <span class="as-btn-label">POKER GAME</span>
+      <span class="as-btn-sub">เกมไพ่</span>
+    </button>
+  </div>
+</section>
+
+<script src="profile.js"></script>
+</body>
+</html>
