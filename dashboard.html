@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PIXEL DASHBOARD</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<!-- ════ TOP BAR ════ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="logo-icon">▣</span>
+    <span class="logo-text">PIXEL DASHBOARD</span>
+    <span class="logo-ver">v2.0</span>
+  </div>
+  <div class="topbar-center">
+    <span id="clock">--:--:--</span>
+    <span id="datestr">----/--/--</span>
+  </div>
+  <div class="topbar-right">
+    <span class="stat-chip">TASKS: <b id="hdr-total">0</b></span>
+    <span class="stat-chip urgent">URGENT: <b id="hdr-urgent">0</b></span>
+    <button class="btn-add-top" onclick="openModal()">[ + NEW TASK ]</button>
+  </div>
+</header>
+
+<!-- ════ DASHBOARD GRID ════ -->
+<main class="dashboard">
+
+  <!-- ── PANEL 1 : URGENT SPOTLIGHT (LEFT) ── -->
+  <section class="panel panel-spotlight" id="panel-spotlight">
+    <div class="panel-header">
+      <span class="ph-icon blink-red">⚠</span>
+      <span class="ph-title">TOP PRIORITY</span>
+      <span class="ph-badge" id="sp-badge">—</span>
+    </div>
+    <div class="panel-body" id="spotlight-body">
+      <div class="no-task-msg">NO URGENT TASKS<br><span>ADD A TASK TO BEGIN</span></div>
+    </div>
+    <div class="next-queue" id="next-queue">
+      <div class="nq-label">NEXT IN QUEUE</div>
+      <div id="nq-list"></div>
+    </div>
+  </section>
+
+  <!-- ── RIGHT COLUMN ── -->
+  <div class="right-col">
+
+    <!-- ── PANEL 2 : ALL TASKS ── -->
+    <section class="panel panel-tasklist" id="panel-tasklist">
+      <div class="panel-header">
+        <span class="ph-icon">▤</span>
+        <span class="ph-title">ALL TASKS</span>
+        <div class="ph-filters">
+          <button class="flt active" data-f="all"     onclick="setFilter('all',this)">ALL</button>
+          <button class="flt"        data-f="special" onclick="setFilter('special',this)">⚡ SPECIAL</button>
+          <button class="flt"        data-f="high"    onclick="setFilter('high',this)">🔴 HIGH</button>
+          <button class="flt"        data-f="medium"  onclick="setFilter('medium',this)">🟡 MEDIUM</button>
+          <button class="flt"        data-f="low"     onclick="setFilter('low',this)">🟢 LOW</button>
+        </div>
+        <button class="btn-add-small" onclick="openModal()">+</button>
+      </div>
+      <div class="task-scroll" id="task-scroll">
+        <ul id="task-list"></ul>
+        <div class="empty-list" id="empty-list">░ NO TASKS FOUND ░</div>
+      </div>
+    </section>
+
+    <!-- ── PANEL 3 : CALENDAR ── -->
+    <section class="panel panel-calendar" id="panel-calendar">
+      <div class="panel-header">
+        <span class="ph-icon">▦</span>
+        <span class="ph-title">CALENDAR</span>
+        <div class="cal-nav">
+          <button onclick="prevMonth()">◀</button>
+          <span id="cal-title">—</span>
+          <button onclick="nextMonth()">▶</button>
+        </div>
+      </div>
+      <div class="cal-grid-wrap">
+        <div class="cal-days-header" id="cal-days-header"></div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="cal-legend">
+        <span class="leg" data-p="special">⚡ SPECIAL</span>
+        <span class="leg" data-p="high">🔴 HIGH</span>
+        <span class="leg" data-p="medium">🟡 MEDIUM</span>
+        <span class="leg" data-p="low">🟢 LOW</span>
+      </div>
+    </section>
+
+  </div><!-- /right-col -->
+</main>
+
+<!-- ════ MODAL ════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span id="modal-title-text">[ + NEW TASK ]</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>TASK NAME</label>
+      <input type="text" id="m-name" placeholder="ENTER TASK NAME..." maxlength="80"/>
+
+      <label>DUE DATE</label>
+      <input type="date" id="m-date"/>
+
+      <label>PRIORITY</label>
+      <div class="prio-group">
+        <button class="prio-opt" data-p="low"     onclick="selectPrio(this)">🟢 ไม่ด่วน</button>
+        <button class="prio-opt" data-p="medium"  onclick="selectPrio(this)">🟡 ด่วน</button>
+        <button class="prio-opt active" data-p="high" onclick="selectPrio(this)">🔴 ด่วนมาก</button>
+        <button class="prio-opt" data-p="special" onclick="selectPrio(this)">⚡ ด่วนพิเศษ</button>
+      </div>
+
+      <label>LABEL COLOR</label>
+      <div class="color-group" id="color-group">
+        <button class="col-opt active" data-c="#00ff9f" style="background:#00ff9f" onclick="selectColor(this)"></button>
+        <button class="col-opt" data-c="#ff6b35" style="background:#ff6b35" onclick="selectColor(this)"></button>
+        <button class="col-opt" data-c="#00cfff" style="background:#00cfff" onclick="selectColor(this)"></button>
+        <button class="col-opt" data-c="#ff3366" style="background:#ff3366" onclick="selectColor(this)"></button>
+        <button class="col-opt" data-c="#ffcc00" style="background:#ffcc00" onclick="selectColor(this)"></button>
+        <button class="col-opt" data-c="#bf7fff" style="background:#bf7fff" onclick="selectColor(this)"></button>
+        <button class="col-opt" data-c="#ff80b5" style="background:#ff80b5" onclick="selectColor(this)"></button>
+        <button class="col-opt" data-c="#80ffea" style="background:#80ffea" onclick="selectColor(this)"></button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-save" id="btn-save" onclick="saveTask()">[ SAVE ]</button>
+        <button class="btn-delete" id="btn-delete" style="display:none" onclick="deleteTask()">[ DELETE ]</button>
+        <button class="btn-cancel" onclick="closeModal()">[ CANCEL ]</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

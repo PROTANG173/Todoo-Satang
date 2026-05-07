@@ -1,145 +1,198 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PIXEL DASHBOARD</title>
-  <link rel="stylesheet" href="style.css"/>
+  <title>SATANG.DEV</title>
+  <link rel="stylesheet" href="profile.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
 <div class="scanlines"></div>
+<div class="crt-vignette"></div>
 
-<!-- ════ TOP BAR ════ -->
+<!-- ═══ TOP BAR ═══ -->
 <header class="topbar">
-  <div class="topbar-left">
-    <span class="logo-icon">▣</span>
-    <span class="logo-text">PIXEL DASHBOARD</span>
-    <span class="logo-ver">v2.0</span>
+  <div class="tb-left">
+    <span class="tb-logo">▣ SATANG.DEV</span>
+    <span class="tb-ver">v1.0</span>
   </div>
-  <div class="topbar-center">
-    <span id="clock">--:--:--</span>
-    <span id="datestr">----/--/--</span>
-  </div>
-  <div class="topbar-right">
-    <span class="stat-chip">TASKS: <b id="hdr-total">0</b></span>
-    <span class="stat-chip urgent">URGENT: <b id="hdr-urgent">0</b></span>
-    <button class="btn-add-top" onclick="openModal()">[ + NEW TASK ]</button>
+  <div class="tb-right">
+    <div id="login-area">
+      <button class="btn-login" onclick="openLogin()">[ LOG IN ]</button>
+    </div>
+    <div id="user-area" style="display:none">
+      <span class="logged-as">▶ ADMIN</span>
+      <button class="btn-logout" onclick="doLogout()">[ LOG OUT ]</button>
+    </div>
   </div>
 </header>
 
-<!-- ════ DASHBOARD GRID ════ -->
-<main class="dashboard">
+<!-- ═══ MAIN GRID ═══ -->
+<main class="grid">
 
-  <!-- ── PANEL 1 : URGENT SPOTLIGHT (LEFT) ── -->
-  <section class="panel panel-spotlight" id="panel-spotlight">
+  <!-- ── BOX 1 : SCHEDULE (LEFT) ── -->
+  <section class="panel box1" id="box1">
     <div class="panel-header">
-      <span class="ph-icon blink-red">⚠</span>
-      <span class="ph-title">TOP PRIORITY</span>
-      <span class="ph-badge" id="sp-badge">—</span>
+      <span class="ph-icon">▤</span>
+      <span class="ph-title">SCHEDULE</span>
+      <span class="ph-sub">// TASK BOARD</span>
     </div>
-    <div class="panel-body" id="spotlight-body">
-      <div class="no-task-msg">NO URGENT TASKS<br><span>ADD A TASK TO BEGIN</span></div>
-    </div>
-    <div class="next-queue" id="next-queue">
-      <div class="nq-label">NEXT IN QUEUE</div>
-      <div id="nq-list"></div>
+    <div class="schedule-body">
+      <div class="schedule-preview">
+        <div class="sp-label">CURRENT QUESTS</div>
+        <div class="sp-items" id="sp-items">
+          <div class="sp-item sp-loading">
+            <span class="blink">█</span> LOADING...
+          </div>
+        </div>
+        <a class="btn-goto" href="dashboard.html" target="_blank">
+          [ OPEN FULL DASHBOARD → ]
+        </a>
+      </div>
+      <!-- EDIT MODE -->
+      <div class="edit-schedule" id="edit-schedule" style="display:none">
+        <label>DASHBOARD URL</label>
+        <input type="text" id="dash-url" placeholder="https://..."/>
+        <button class="btn-save-field" onclick="saveField('dashUrl')">[ SAVE ]</button>
+      </div>
     </div>
   </section>
 
   <!-- ── RIGHT COLUMN ── -->
   <div class="right-col">
 
-    <!-- ── PANEL 2 : ALL TASKS ── -->
-    <section class="panel panel-tasklist" id="panel-tasklist">
+    <!-- ── BOX 2 : PROFILE PHOTO ── -->
+    <section class="panel box2" id="box2">
       <div class="panel-header">
-        <span class="ph-icon">▤</span>
-        <span class="ph-title">ALL TASKS</span>
-        <div class="ph-filters">
-          <button class="flt active" data-f="all"     onclick="setFilter('all',this)">ALL</button>
-          <button class="flt"        data-f="special" onclick="setFilter('special',this)">⚡ SPECIAL</button>
-          <button class="flt"        data-f="high"    onclick="setFilter('high',this)">🔴 HIGH</button>
-          <button class="flt"        data-f="medium"  onclick="setFilter('medium',this)">🟡 MEDIUM</button>
-          <button class="flt"        data-f="low"     onclick="setFilter('low',this)">🟢 LOW</button>
-        </div>
-        <button class="btn-add-small" onclick="openModal()">+</button>
+        <span class="ph-icon">▣</span>
+        <span class="ph-title">PLAYER</span>
+        <button class="btn-edit-panel" id="btn-edit-photo" onclick="toggleEditPhoto()" style="display:none">[ EDIT ]</button>
       </div>
-      <div class="task-scroll" id="task-scroll">
-        <ul id="task-list"></ul>
-        <div class="empty-list" id="empty-list">░ NO TASKS FOUND ░</div>
+      <div class="photo-body">
+        <div class="photo-frame">
+          <img id="profile-img" src="https://i.postimg.cc/VkM56kQr/unnamed-(1).jpg" alt="Satang"/>
+          <div class="photo-corner tl"></div>
+          <div class="photo-corner tr"></div>
+          <div class="photo-corner bl"></div>
+          <div class="photo-corner br"></div>
+        </div>
+        <!-- edit mode -->
+        <div class="edit-photo" id="edit-photo" style="display:none">
+          <label>IMAGE URL</label>
+          <input type="text" id="photo-url-input" placeholder="https://..."/>
+          <button class="btn-save-field" onclick="saveField('photoUrl')">[ APPLY ]</button>
+        </div>
       </div>
     </section>
 
-    <!-- ── PANEL 3 : CALENDAR ── -->
-    <section class="panel panel-calendar" id="panel-calendar">
+    <!-- ── BOX 3 : BIO + COUNTDOWN ── -->
+    <section class="panel box3" id="box3">
       <div class="panel-header">
-        <span class="ph-icon">▦</span>
-        <span class="ph-title">CALENDAR</span>
-        <div class="cal-nav">
-          <button onclick="prevMonth()">◀</button>
-          <span id="cal-title">—</span>
-          <button onclick="nextMonth()">▶</button>
+        <span class="ph-icon">◈</span>
+        <span class="ph-title">PROFILE</span>
+        <button class="btn-edit-panel" id="btn-edit-bio" onclick="toggleEditBio()" style="display:none">[ EDIT ]</button>
+      </div>
+      <div class="bio-body">
+
+        <div class="bio-grid" id="bio-display">
+          <div class="bio-row">
+            <span class="bio-key">NAME</span>
+            <span class="bio-val" id="d-name">Thanawit Kongnin</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">NICKNAME</span>
+            <span class="bio-val" id="d-nick">Satang</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">AGE</span>
+            <span class="bio-val" id="d-age">17</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">BORN</span>
+            <span class="bio-val" id="d-born">17 / 02 / 2009</span>
+          </div>
+          <div class="bio-row">
+            <span class="bio-key">SCHOOL</span>
+            <span class="bio-val" id="d-school">NongphaiSchool</span>
+          </div>
         </div>
-      </div>
-      <div class="cal-grid-wrap">
-        <div class="cal-days-header" id="cal-days-header"></div>
-        <div class="cal-grid" id="cal-grid"></div>
-      </div>
-      <div class="cal-legend">
-        <span class="leg" data-p="special">⚡ SPECIAL</span>
-        <span class="leg" data-p="high">🔴 HIGH</span>
-        <span class="leg" data-p="medium">🟡 MEDIUM</span>
-        <span class="leg" data-p="low">🟢 LOW</span>
+
+        <!-- EDIT FIELDS -->
+        <div class="bio-edit" id="bio-edit" style="display:none">
+          <label>FULL NAME</label>
+          <input type="text" id="e-name" value="Thanawit Kongnin"/>
+          <label>NICKNAME</label>
+          <input type="text" id="e-nick" value="Satang"/>
+          <label>AGE</label>
+          <input type="text" id="e-age" value="17"/>
+          <label>BORN (DD/MM/YYYY)</label>
+          <input type="text" id="e-born" value="17/02/2009"/>
+          <label>SCHOOL</label>
+          <input type="text" id="e-school" value="NongphaiSchool"/>
+          <button class="btn-save-field" onclick="saveBio()">[ SAVE ALL ]</button>
+        </div>
+
+        <!-- BIRTHDAY COUNTDOWN -->
+        <div class="countdown-box">
+          <div class="cd-label">🎂 NEXT BIRTHDAY IN</div>
+          <div class="cd-timer" id="cd-timer">
+            <span class="cd-unit"><b id="cd-days">--</b><small>DAYS</small></span>
+            <span class="cd-sep">:</span>
+            <span class="cd-unit"><b id="cd-hrs">--</b><small>HRS</small></span>
+            <span class="cd-sep">:</span>
+            <span class="cd-unit"><b id="cd-min">--</b><small>MIN</small></span>
+            <span class="cd-sep">:</span>
+            <span class="cd-unit"><b id="cd-sec">--</b><small>SEC</small></span>
+          </div>
+        </div>
+
       </div>
     </section>
 
   </div><!-- /right-col -->
 </main>
 
-<!-- ════ MODAL ════ -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
+<!-- ═══ LOGIN MODAL ═══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeLoginOutside(event)">
+  <div class="modal">
     <div class="modal-header">
-      <span id="modal-title-text">[ + NEW TASK ]</span>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <span>[ ADMIN LOGIN ]</span>
+      <button onclick="closeLogin()">✕</button>
     </div>
     <div class="modal-body">
-      <label>TASK NAME</label>
-      <input type="text" id="m-name" placeholder="ENTER TASK NAME..." maxlength="80"/>
-
-      <label>DUE DATE</label>
-      <input type="date" id="m-date"/>
-
-      <label>PRIORITY</label>
-      <div class="prio-group">
-        <button class="prio-opt" data-p="low"     onclick="selectPrio(this)">🟢 ไม่ด่วน</button>
-        <button class="prio-opt" data-p="medium"  onclick="selectPrio(this)">🟡 ด่วน</button>
-        <button class="prio-opt active" data-p="high" onclick="selectPrio(this)">🔴 ด่วนมาก</button>
-        <button class="prio-opt" data-p="special" onclick="selectPrio(this)">⚡ ด่วนพิเศษ</button>
-      </div>
-
-      <label>LABEL COLOR</label>
-      <div class="color-group" id="color-group">
-        <button class="col-opt active" data-c="#00ff9f" style="background:#00ff9f" onclick="selectColor(this)"></button>
-        <button class="col-opt" data-c="#ff6b35" style="background:#ff6b35" onclick="selectColor(this)"></button>
-        <button class="col-opt" data-c="#00cfff" style="background:#00cfff" onclick="selectColor(this)"></button>
-        <button class="col-opt" data-c="#ff3366" style="background:#ff3366" onclick="selectColor(this)"></button>
-        <button class="col-opt" data-c="#ffcc00" style="background:#ffcc00" onclick="selectColor(this)"></button>
-        <button class="col-opt" data-c="#bf7fff" style="background:#bf7fff" onclick="selectColor(this)"></button>
-        <button class="col-opt" data-c="#ff80b5" style="background:#ff80b5" onclick="selectColor(this)"></button>
-        <button class="col-opt" data-c="#80ffea" style="background:#80ffea" onclick="selectColor(this)"></button>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-save" id="btn-save" onclick="saveTask()">[ SAVE ]</button>
-        <button class="btn-delete" id="btn-delete" style="display:none" onclick="deleteTask()">[ DELETE ]</button>
-        <button class="btn-cancel" onclick="closeModal()">[ CANCEL ]</button>
-      </div>
+      <label>ADMIN NAME</label>
+      <input type="text" id="un-input" placeholder="ENTER USERNAME..." autocomplete="off"/>
+      <label>PASSWORD</label>
+      <input type="password" id="pw-input" placeholder="ENTER PASSWORD..." onkeydown="if(event.key==='Enter')doLogin()"/>
+      <div class="login-error" id="login-error">❌ INVALID CREDENTIALS</div>
+      <div class="login-hint" id="login-hint"></div>
+      <button class="btn-login-go" id="btn-login-go" onclick="doLogin()">[ LOGIN ]</button>
     </div>
   </div>
 </div>
 
-<script src="app.js"></script>
+<!-- ═══ ADMIN SECTION (hidden until login) ═══ -->
+<section class="admin-section" id="admin-section" style="display:none">
+  <div class="as-header">
+    <span class="as-title">▣ ADMIN PANEL</span>
+    <span class="as-sub">// SELECT MODULE</span>
+  </div>
+  <div class="as-buttons">
+    <button class="as-btn" onclick="window.open(bio.dashUrl || 'dashboard.html', '_blank')">
+      <span class="as-btn-icon">▤</span>
+      <span class="as-btn-label">TASK BOARD</span>
+      <span class="as-btn-sub">ตารางงาน</span>
+    </button>
+    <button class="as-btn" onclick="void(0)">
+      <span class="as-btn-icon">♠</span>
+      <span class="as-btn-label">POKER GAME</span>
+      <span class="as-btn-sub">เกมไพ่</span>
+    </button>
+  </div>
+</section>
+
+<script src="profile.js"></script>
 </body>
 </html>

@@ -28,7 +28,7 @@ let bio = JSON.parse(localStorage.getItem('satangBio') || 'null') || {
   born:     '17/02/2009',
   school:   'NongphaiSchool',
   photoUrl: 'https://i.postimg.cc/VkM56kQr/unnamed-(1).jpg',
-  dashUrl:  'index.html'
+  dashUrl:  'dashboard.html'
 };
 
 /* ── SIMPLE HASH (djb2 — works on file:// and https://) ── */
